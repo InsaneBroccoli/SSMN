@@ -11,7 +11,10 @@ void setup()
 
 enum States {
     INITIAL,
-    LEDS
+    IDLE,
+    MOVE_TO_END,
+    RETURN_TO_START,
+    TESTING
 };
 
 States state = States::INITIAL;
@@ -23,7 +26,7 @@ void loop()
     {
     case States::INITIAL:
         Serial.println("\nInitialising");
-        state = States::LEDS;
+        state = States::TESTING;
         Serial.println("Running");
         break;
     
