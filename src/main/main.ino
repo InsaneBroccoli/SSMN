@@ -16,7 +16,6 @@
 #define INIT_POS 0
 #define DEPLOY_POS 90
 
-
 Servo myservo;
 
 void setup()
@@ -38,6 +37,7 @@ enum States {
     MOVE_TO_END,
     RETURN_TO_START,
     DELIVER_BALL,
+    ERROR,
     TESTING
 };
 
@@ -45,9 +45,10 @@ States state = States::INITIAL;
 
 int pos = INIT_POS;
 
-
 void loop()
 {
+    unsigned timer_start = millis();
+
     switch (state)
     {
     case States::INITIAL:
@@ -59,18 +60,7 @@ void loop()
         break;
     
     case States::TESTING:
-        for ( pos = 0; pos <= 180; pos++)
-        {
-            myservo.write(pos);
-            delay(15);
-        }
-
-        for ( pos = 180; pos >= 0; pos--)
-        {
-            myservo.write(pos);
-            delay(15);
-        }
-               
+                       
         break;
     
     case States::IDLE:
@@ -124,6 +114,8 @@ void loop()
             digitalWrite(MOTOR1, HIGH);
             digitalWrite(MOTOR2, HIGH);
         }
+        break;
+    case ERROR:
         break;
     default:
         break;
