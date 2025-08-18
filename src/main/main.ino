@@ -3,7 +3,7 @@
 #define LED2 13
 #define MOTOR 5
 #define WAIT 100
-#define TIME_TO_DELIVER 1000
+#define TIME_TO_DELIVER 3000
 #define BUTTON_START 9
 #define BUTTON_END 8
 #define BUTTON_RETURNED 7
@@ -34,6 +34,8 @@ enum States {
 
 States state = States::INITIAL;
 
+int pos = INIT_POS;
+
 
 void loop()
 {
@@ -41,16 +43,13 @@ void loop()
     {
     case States::INITIAL:
         Serial.println("\nInitialising");
-
-        int pos = INIT_POS;
         myservo.write(pos);
         delay(15);
-        state = States::TESTING;
+        state = States::IDLE;
         Serial.println("Running");
         break;
     
     case States::TESTING:
-        Serial.println("testing");
         for ( pos = 0; pos <= 180; pos++)
         {
             myservo.write(pos);
@@ -82,15 +81,17 @@ void loop()
         if (digitalRead(BUTTON_END) == LOW)
         {
             state = States::DELIVER_BALL;
+
             pos = DEPLOY_POS;
+            delay(1000);
             myservo.write(pos);
-            digitalWrite(MOTOR, LOW);
         }        
         break;
     case States::DELIVER_BALL:
         delay(TIME_TO_DELIVER);
 
         state = States::RETURN_TO_START;
+        digitalWrite(MOTOR, LOW);
         pos = INIT_POS;
         myservo.write(pos);
         break;
