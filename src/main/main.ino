@@ -59,7 +59,6 @@ void loop()
         if (digitalRead(BUTTON_START) == LOW)
         {
             state = States::MOVE_TO_END;
-            Serial.println("Move to end");
             digitalWrite(MOTOR, HIGH);
         } else
         {
@@ -67,33 +66,30 @@ void loop()
             delay(WAIT);
             digitalWrite(MOTOR, HIGH);
             delay(WAIT);
-        }        
-    break;
+        }
+        break;
     case States::MOVE_TO_END:
         if (digitalRead(BUTTON_END) == LOW)
         {
             state = States::DELIVER_BALL;
-            Serial.println("Deliver Ball");
             pos = DEPLOY_POS;
             myservo.write(pos);
             digitalWrite(MOTOR, LOW);
         }        
-    break;
+        break;
     case States::DELIVER_BALL:
         delay(TIME_TO_DELIVER);
 
         state = States::RETURN_TO_START;
         pos = INIT_POS;
         myservo.write(pos);
-        Serial.println("Return to start");
-    break;
+        break;
     case States::RETURN_TO_START:
         if (digitalRead(BUTTON_RETURNED) == LOW)
         {
             state = States::IDLE;
-            Serial.println("Idle");
         }
-    break;
+        break;
     default:
         break;
     }
