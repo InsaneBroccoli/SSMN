@@ -1,12 +1,19 @@
+#include <Servo.h>
+
 #define LED2 13
 #define MOTOR 5
 #define WAIT 100
+#define TIME_TO_DELIVER 1000
 #define BUTTON_START 9
 #define BUTTON_END 8
 #define BUTTON_RETURNED 7
 
+Servo myservo;
+
 void setup()
 {
+    myservo.attach(3);
+
     pinMode(LED2, OUTPUT);
     pinMode(BUTTON_START, INPUT_PULLUP);
     pinMode(BUTTON_END, INPUT_PULLUP);
@@ -19,6 +26,7 @@ enum States {
     IDLE,
     MOVE_TO_END,
     RETURN_TO_START,
+    DELIVER_BALL,
     TESTING
 };
 
@@ -31,6 +39,9 @@ void loop()
     {
     case States::INITIAL:
         Serial.println("\nInitialising");
+
+        int pos = 0;
+        myservo.write(pos);
         state = States::IDLE;
         Serial.println("Running");
         break;
@@ -58,9 +69,15 @@ void loop()
     case States::MOVE_TO_END:
         if (digitalRead(BUTTON_END) == LOW)
         {
-            state = States::RETURN_TO_START;
+            state = States::DELIVER_BALL;
+            pos = 90;
+            myservo.write(pos);
             digitalWrite(MOTOR, LOW);
         }        
+    break;
+    case States::DELIVER_BALL:
+        delay(TIME_TO_DELIVER);
+        state = States::RETURN_TO_START;
     break;
     case States::RETURN_TO_START:
         if (digitalRead(BUTTON_RETURNED) == LOW)
