@@ -44,15 +44,12 @@ void loop()
 
         int pos = INIT_POS;
         myservo.write(pos);
-        state = States::IDLE;
+        state = States::TESTING;
         Serial.println("Running");
         break;
     
     case States::TESTING:
-        digitalWrite(LED2, LOW);
-        delay(WAIT);
-        digitalWrite(LED2, HIGH);
-        delay(WAIT);
+        myservo.write()
         break;
     
     case States::IDLE:
