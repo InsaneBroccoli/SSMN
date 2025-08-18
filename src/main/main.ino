@@ -47,8 +47,6 @@ int pos = INIT_POS;
 
 void loop()
 {
-    unsigned timer_start = millis();
-
     switch (state)
     {
     case States::INITIAL:
@@ -68,15 +66,15 @@ void loop()
         {
             state = States::MOVE_TO_END;
 
-            // activate motor cw;
+            // activate motor cw
             digitalWrite(MOTOR1, HIGH);
             digitalWrite(MOTOR2, LOW);
         } else
-        {
+          {
             // Stop motor
             digitalWrite(MOTOR1, HIGH);
             digitalWrite(MOTOR2, HIGH);
-        }
+          }
         break;
     case States::MOVE_TO_END:
         if (digitalRead(BUTTON_END) == LOW)
