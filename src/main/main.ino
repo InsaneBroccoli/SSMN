@@ -44,12 +44,25 @@ void loop()
 
         int pos = INIT_POS;
         myservo.write(pos);
+        delay(15);
         state = States::TESTING;
         Serial.println("Running");
         break;
     
     case States::TESTING:
-        myservo.write()
+        Serial.println("testing");
+        for ( pos = 0; pos <= 180; pos++)
+        {
+            myservo.write(pos);
+            delay(15);
+        }
+
+        for ( pos = 180; pos >= 0; pos--)
+        {
+            myservo.write(pos);
+            delay(15);
+        }
+               
         break;
     
     case States::IDLE:
