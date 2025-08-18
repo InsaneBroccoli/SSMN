@@ -7,6 +7,8 @@
 #define BUTTON_START 9
 #define BUTTON_END 8
 #define BUTTON_RETURNED 7
+#define INIT_POS 0
+#define DEPLOY_POS 90
 
 Servo myservo;
 
@@ -40,7 +42,7 @@ void loop()
     case States::INITIAL:
         Serial.println("\nInitialising");
 
-        int pos = 0;
+        int pos = INIT_POS;
         myservo.write(pos);
         state = States::IDLE;
         Serial.println("Running");
@@ -57,6 +59,7 @@ void loop()
         if (digitalRead(BUTTON_START) == LOW)
         {
             state = States::MOVE_TO_END;
+            Serial.println("Move to end");
             digitalWrite(MOTOR, HIGH);
         } else
         {
@@ -70,19 +73,25 @@ void loop()
         if (digitalRead(BUTTON_END) == LOW)
         {
             state = States::DELIVER_BALL;
-            pos = 90;
+            Serial.println("Deliver Ball");
+            pos = DEPLOY_POS;
             myservo.write(pos);
             digitalWrite(MOTOR, LOW);
         }        
     break;
     case States::DELIVER_BALL:
         delay(TIME_TO_DELIVER);
+
         state = States::RETURN_TO_START;
+        pos = INIT_POS;
+        myservo.write(pos);
+        Serial.println("Return to start");
     break;
     case States::RETURN_TO_START:
         if (digitalRead(BUTTON_RETURNED) == LOW)
         {
             state = States::IDLE;
+            Serial.println("Idle");
         }
     break;
     default:
