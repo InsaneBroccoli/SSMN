@@ -1,12 +1,15 @@
 #include <Servo.h>
+#include <Arduino.h>
+#include "buzzer.h"
 
 // Pins
 #define LED2 13
+#define BUZZER 12
+#define BUTTON_START 9
+#define BUTTON_END 2
+#define BUTTON_RETURNED 7
 #define MOTOR1 4
 #define MOTOR2 5
-#define BUTTON_START 9
-#define BUTTON_END 8
-#define BUTTON_RETURNED 7
 
 // Waiting periods
 #define WAIT 100
@@ -28,6 +31,9 @@ void setup()
     pinMode(BUTTON_START, INPUT_PULLUP);
     pinMode(BUTTON_END, INPUT_PULLUP);
     pinMode(BUTTON_RETURNED, INPUT_PULLUP);
+
+    attachInterrupt(digitalPinToInterrupt(BUTTON_END), stop_motor, FALLING);
+
     Serial.begin(9600);
 }
 
@@ -54,7 +60,7 @@ void loop()
         myservo.write(pos);
         delay(15);
         state = States::IDLE;
-        Serial.println("Running");
+        Serial.println("IDLE");
         break;
     
     case States::TESTING:
@@ -64,11 +70,14 @@ void loop()
     case States::IDLE:
         if (digitalRead(BUTTON_START) == LOW)
         {
+            mario_racing();
             state = States::MOVE_TO_END;
+            Serial.println("MOVE TO END");
 
             // activate motor cw
             digitalWrite(MOTOR1, HIGH);
             digitalWrite(MOTOR2, LOW);
+            crazyfrog();
         } else
           {
             // Stop motor
@@ -80,21 +89,20 @@ void loop()
         if (digitalRead(BUTTON_END) == LOW)
         {
             state = States::DELIVER_BALL;
-
-            // Stop motor
-            digitalWrite(MOTOR1, HIGH);
-            digitalWrite(MOTOR2, HIGH);
+            Serial.println("DELIVER BALL");
 
             delay(1000);
             // eject
             pos = DEPLOY_POS;
             myservo.write(pos);
+            level_clear();
         }        
         break;
     case States::DELIVER_BALL:
         delay(TIME_TO_DELIVER);
 
         state = States::RETURN_TO_START;
+        Serial.println("RETURN TO START");
 
         // activate motor ccw
         digitalWrite(MOTOR1, LOW);
@@ -107,7 +115,8 @@ void loop()
         if (digitalRead(BUTTON_RETURNED) == LOW)
         {
             state = States::IDLE;
-
+            Serial.println("IDLE");
+            
             // Stop motor
             digitalWrite(MOTOR1, HIGH);
             digitalWrite(MOTOR2, HIGH);
@@ -117,5 +126,16 @@ void loop()
         break;
     default:
         break;
+    }
+}
+
+void stop_motor()
+{
+    if (state == States::MOVE_TO_END)
+    {
+    // Stop motor
+    digitalWrite(MOTOR1, HIGH);
+    digitalWrite(MOTOR2, HIGH);
+    Serial.println("MOTOR STOP");
     }
 }
