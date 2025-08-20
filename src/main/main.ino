@@ -1,5 +1,4 @@
 #include <Servo.h>
-#include <Arduino.h>
 #include "buzzer.h"
 
 // Pins
