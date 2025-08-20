@@ -16,7 +16,7 @@
 
 // Positioning
 #define INIT_POS 0
-#define DEPLOY_POS 90
+#define DEPLOY_POS 120
 
 Servo myservo;
 
@@ -57,8 +57,14 @@ void loop()
         Serial.println("\nInitialising");
         myservo.write(INIT_POS);
         delay(15);
-        state = States::IDLE;
-        Serial.println("IDLE");
+
+        state = States::FIND_START;
+        Serial.println("FINDING START");
+
+        digitalWrite(MOTOR1, LOW);
+        digitalWrite(MOTOR2, HIGH);
+
+
         break;
     
     case States::TESTING:
@@ -67,7 +73,15 @@ void loop()
                        
         break;
     case States::FIND_START:
-        
+        if (digitalRead(BUTTON_RETURNED) == LOW )
+        {
+            state = States::IDLE;
+            Serial.println("IDLE");
+
+            digitalWrite(MOTOR1, HIGH);
+            digitalWrite(MOTOR2, HIGH);
+        }
+
         break;
     
     case States::IDLE:
@@ -78,8 +92,8 @@ void loop()
             Serial.println("MOVE TO END");
 
             // activate motor ccw
-            digitalWrite(MOTOR1, LOW);
-            digitalWrite(MOTOR2, HIGH);
+            digitalWrite(MOTOR1, HIGH);
+            digitalWrite(MOTOR2, LOW);
             crazyfrog();
         } else
           {
@@ -138,6 +152,7 @@ void stop_motor()
         digitalWrite(MOTOR1, HIGH);
         digitalWrite(MOTOR2, HIGH);
         Serial.println("MOTOR STOP");
+
     }
     
 }
