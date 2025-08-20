@@ -38,6 +38,7 @@ void setup()
 
 enum States {
     INITIAL,
+    FIND_START,
     IDLE,
     MOVE_TO_END,
     RETURN_TO_START,
@@ -48,22 +49,25 @@ enum States {
 
 States state = States::INITIAL;
 
-int pos = INIT_POS;
-
 void loop()
 {
     switch (state)
     {
     case States::INITIAL:
         Serial.println("\nInitialising");
-        myservo.write(pos);
+        myservo.write(INIT_POS);
         delay(15);
         state = States::IDLE;
         Serial.println("IDLE");
         break;
     
     case States::TESTING:
+        Serial.println("TESTING");
+        delay(10000);
                        
+        break;
+    case States::FIND_START:
+        
         break;
     
     case States::IDLE:
@@ -73,9 +77,9 @@ void loop()
             state = States::MOVE_TO_END;
             Serial.println("MOVE TO END");
 
-            // activate motor cw
-            digitalWrite(MOTOR1, HIGH);
-            digitalWrite(MOTOR2, LOW);
+            // activate motor ccw
+            digitalWrite(MOTOR1, LOW);
+            digitalWrite(MOTOR2, HIGH);
             crazyfrog();
         } else
           {
@@ -92,8 +96,7 @@ void loop()
 
             delay(1000);
             // eject
-            pos = DEPLOY_POS;
-            myservo.write(pos);
+            myservo.write(DEPLOY_POS);
             level_clear();
         }        
         break;
@@ -103,12 +106,11 @@ void loop()
         state = States::RETURN_TO_START;
         Serial.println("RETURN TO START");
 
-        // activate motor ccw
-        digitalWrite(MOTOR1, LOW);
-        digitalWrite(MOTOR2, HIGH);
+        // activate motor cw
+        digitalWrite(MOTOR1, HIGH);
+        digitalWrite(MOTOR2, LOW);
 
-        pos = INIT_POS;
-        myservo.write(pos);
+        myservo.write(INIT_POS);
         break;
     case States::RETURN_TO_START:
         if (digitalRead(BUTTON_RETURNED) == LOW)
@@ -132,9 +134,10 @@ void stop_motor()
 {
     if (state == States::MOVE_TO_END)
     {
-    // Stop motor
-    digitalWrite(MOTOR1, HIGH);
-    digitalWrite(MOTOR2, HIGH);
-    Serial.println("MOTOR STOP");
+        // Stop motor
+        digitalWrite(MOTOR1, HIGH);
+        digitalWrite(MOTOR2, HIGH);
+        Serial.println("MOTOR STOP");
     }
+    
 }
