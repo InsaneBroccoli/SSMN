@@ -2,21 +2,25 @@
 #include "buzzer.h"
 
 // Pins
-#define LED2 13
 #define BUZZER 12
 #define BUTTON_START 9
 #define BUTTON_END 2
 #define BUTTON_RETURNED 7
+#define SERVO 3
+#define enA 10
 #define MOTOR1 4
 #define MOTOR2 5
 
 // Waiting periods
 #define WAIT 100
-#define TIME_TO_DELIVER 3000
+#define TIME_TO_DELIVER 100
 
 // Positioning
 #define INIT_POS 0
 #define DEPLOY_POS 120
+
+// Motors
+#define SPEED 0.01
 
 enum States {
     INITIAL,
@@ -33,8 +37,9 @@ bool handled;
 
 void setup()
 {
-    myservo.attach(3);
+    myservo.attach(SERVO);
 
+    pinMode(enA, OUTPUT);
     pinMode(MOTOR1, OUTPUT);
     pinMode(MOTOR2, OUTPUT);
     
@@ -42,7 +47,10 @@ void setup()
     pinMode(BUTTON_END, INPUT_PULLUP);
     pinMode(BUTTON_RETURNED, INPUT_PULLUP);
 
-    attachInterrupt(digitalPinToInterrupt(BUTTON_END), stop_motor, FALLING);
+    digitalWrite(MOTOR1, HIGH);
+    digitalWrite(MOTOR2, HIGH);
+
+    attachInterrupt(digitalPinToInterrupt(BUTTON_END), IRS_stop_motor, FALLING);
 
     Serial.begin(9600);
 }
@@ -62,8 +70,8 @@ void loop()
         handled = false;
         Serial.println("FINDING START");
 
-        digitalWrite(MOTOR1, LOW);
-        digitalWrite(MOTOR2, HIGH);
+        move_cw(SPEED);
+
         break;
 
     case States::FIND_START:
@@ -72,8 +80,7 @@ void loop()
             state = States::IDLE;
             Serial.println("IDLE");
 
-            digitalWrite(MOTOR1, HIGH);
-            digitalWrite(MOTOR2, HIGH);
+            stop_motor();
         }
         break;
     
@@ -84,15 +91,11 @@ void loop()
             state = States::MOVE_TO_END;
             Serial.println("MOVE TO END");
 
-            // activate motor ccw
-            digitalWrite(MOTOR1, HIGH);
-            digitalWrite(MOTOR2, LOW);
+            move_ccw(SPEED);
             crazyfrog();
         } else
           {
-            // Stop motor
-            digitalWrite(MOTOR1, HIGH);
-            digitalWrite(MOTOR2, HIGH);
+            stop_motor();
           }
         break;
 
@@ -117,9 +120,7 @@ void loop()
         state = States::RETURN_TO_START;
         Serial.println("RETURN TO START");
 
-        // activate motor cw
-        digitalWrite(MOTOR1, LOW);
-        digitalWrite(MOTOR2, HIGH);
+        move_cw(SPEED);
 
         myservo.write(INIT_POS);
         break;
@@ -131,8 +132,7 @@ void loop()
             Serial.println("IDLE");
             
             // Stop motor
-            digitalWrite(MOTOR1, HIGH);
-            digitalWrite(MOTOR2, HIGH);
+            stop_motor();
         }
         break;
 
@@ -141,14 +141,38 @@ void loop()
     }
 }
 
-void stop_motor()
+void IRS_stop_motor()
 {
     if (state == States::MOVE_TO_END && !handled)
     {
-        // Stop motor
-        digitalWrite(MOTOR1, HIGH);
-        digitalWrite(MOTOR2, HIGH);
+        stop_motor();
         Serial.println("MOTOR STOP");
         handled = true;
     }    
+}
+
+void speed_control(float speed)
+{
+    digitalWrite(enA, int((speed * 256) - 1));    
+}
+
+void move_ccw(float speed) 
+{   
+    digitalWrite(MOTOR1, HIGH);
+    digitalWrite(MOTOR2, LOW);
+    speed_control(speed);
+}
+
+void move_cw(float speed) 
+{   
+    digitalWrite(MOTOR1, LOW);
+    digitalWrite(MOTOR2, HIGH);
+    speed_control(speed);
+}
+
+void stop_motor()
+{
+    speed_control(0);
+    digitalWrite(MOTOR1, HIGH);
+    digitalWrite(MOTOR2, HIGH);
 }
