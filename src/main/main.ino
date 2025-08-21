@@ -7,7 +7,7 @@
 #define BUTTON_END 2
 #define BUTTON_RETURNED 7
 #define SERVO 3
-#define enA 10
+#define ENA 10
 #define MOTOR1 4
 #define MOTOR2 5
 
@@ -20,7 +20,7 @@
 #define DEPLOY_POS 120
 
 // Motors
-#define SPEED 0.01
+#define SPEED 1 // 0 - 1
 
 enum States {
     INITIAL,
@@ -39,7 +39,7 @@ void setup()
 {
     myservo.attach(SERVO);
 
-    pinMode(enA, OUTPUT);
+    pinMode(ENA, OUTPUT);
     pinMode(MOTOR1, OUTPUT);
     pinMode(MOTOR2, OUTPUT);
     
@@ -47,8 +47,8 @@ void setup()
     pinMode(BUTTON_END, INPUT_PULLUP);
     pinMode(BUTTON_RETURNED, INPUT_PULLUP);
 
-    digitalWrite(MOTOR1, HIGH);
-    digitalWrite(MOTOR2, HIGH);
+    digitalWrite(MOTOR1, LOW);
+    digitalWrite(MOTOR2, LOW);
 
     attachInterrupt(digitalPinToInterrupt(BUTTON_END), IRS_stop_motor, FALLING);
 
@@ -95,7 +95,7 @@ void loop()
             crazyfrog();
         } else
           {
-            stop_motor();
+            //stop_motor();
           }
         break;
 
@@ -153,7 +153,11 @@ void IRS_stop_motor()
 
 void speed_control(float speed)
 {
-    digitalWrite(enA, int((speed * 256) - 1));    
+    int trgt_speed = (int)((speed * 256) - 1);
+    trgt_speed = trgt_speed < 0 ? 0 : trgt_speed;
+
+    analogWrite(ENA, trgt_speed);
+    Serial.println(trgt_speed);
 }
 
 void move_ccw(float speed) 
@@ -173,6 +177,6 @@ void move_cw(float speed)
 void stop_motor()
 {
     speed_control(0);
-    digitalWrite(MOTOR1, HIGH);
-    digitalWrite(MOTOR2, HIGH);
+    digitalWrite(MOTOR1, LOW);
+    digitalWrite(MOTOR2, LOW);
 }
