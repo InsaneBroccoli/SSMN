@@ -18,15 +18,27 @@
 #define INIT_POS 0
 #define DEPLOY_POS 120
 
+enum States {
+    INITIAL,
+    FIND_START,
+    IDLE,
+    MOVE_TO_END,
+    RETURN_TO_START,
+    DELIVER_BALL,
+    TESTING
+};
+
 Servo myservo;
+States state = States::INITIAL;
+bool handled;
 
 void setup()
 {
     myservo.attach(3);
 
-    pinMode(LED2, OUTPUT);
     pinMode(MOTOR1, OUTPUT);
     pinMode(MOTOR2, OUTPUT);
+    
     pinMode(BUTTON_START, INPUT_PULLUP);
     pinMode(BUTTON_END, INPUT_PULLUP);
     pinMode(BUTTON_RETURNED, INPUT_PULLUP);
@@ -36,19 +48,7 @@ void setup()
     Serial.begin(9600);
 }
 
-enum States {
-    INITIAL,
-    FIND_START,
-    IDLE,
-    MOVE_TO_END,
-    RETURN_TO_START,
-    DELIVER_BALL,
-    ERROR,
-    TESTING
-};
 
-States state = States::INITIAL;
-bool handled;
 
 void loop()
 {
@@ -65,14 +65,13 @@ void loop()
 
         digitalWrite(MOTOR1, LOW);
         digitalWrite(MOTOR2, HIGH);
-
         break;
     
     case States::TESTING:
         Serial.println("TESTING");
         delay(10000);
-
         break;
+
     case States::FIND_START:
         if (digitalRead(BUTTON_RETURNED) == LOW )
         {
@@ -82,7 +81,6 @@ void loop()
             digitalWrite(MOTOR1, HIGH);
             digitalWrite(MOTOR2, HIGH);
         }
-
         break;
     
     case States::IDLE:
@@ -103,6 +101,7 @@ void loop()
             digitalWrite(MOTOR2, HIGH);
           }
         break;
+
     case States::MOVE_TO_END:
         if (handled)
         {
@@ -111,11 +110,13 @@ void loop()
             handled = false;
 
             delay(1000);
+
             // eject
             myservo.write(DEPLOY_POS);
             level_clear();
-        }        
+        }
         break;
+
     case States::DELIVER_BALL:
         delay(TIME_TO_DELIVER);
 
@@ -128,6 +129,7 @@ void loop()
 
         myservo.write(INIT_POS);
         break;
+
     case States::RETURN_TO_START:
         if (digitalRead(BUTTON_RETURNED) == LOW)
         {
@@ -139,8 +141,7 @@ void loop()
             digitalWrite(MOTOR2, HIGH);
         }
         break;
-    case ERROR:
-        break;
+
     default:
         break;
     }
@@ -155,6 +156,5 @@ void stop_motor()
         digitalWrite(MOTOR2, HIGH);
         Serial.println("MOTOR STOP");
         handled = true;
-    }
-    
+    }    
 }
