@@ -48,6 +48,7 @@ enum States {
 };
 
 States state = States::INITIAL;
+bool handled;
 
 void loop()
 {
@@ -59,18 +60,18 @@ void loop()
         delay(15);
 
         state = States::FIND_START;
+        handled = false;
         Serial.println("FINDING START");
 
         digitalWrite(MOTOR1, LOW);
         digitalWrite(MOTOR2, HIGH);
-
 
         break;
     
     case States::TESTING:
         Serial.println("TESTING");
         delay(10000);
-                       
+
         break;
     case States::FIND_START:
         if (digitalRead(BUTTON_RETURNED) == LOW )
@@ -103,10 +104,11 @@ void loop()
           }
         break;
     case States::MOVE_TO_END:
-        if (digitalRead(BUTTON_END) == LOW)
+        if (handled)
         {
             state = States::DELIVER_BALL;
             Serial.println("DELIVER BALL");
+            handled = false;
 
             delay(1000);
             // eject
@@ -121,8 +123,8 @@ void loop()
         Serial.println("RETURN TO START");
 
         // activate motor cw
-        digitalWrite(MOTOR1, HIGH);
-        digitalWrite(MOTOR2, LOW);
+        digitalWrite(MOTOR1, LOW);
+        digitalWrite(MOTOR2, HIGH);
 
         myservo.write(INIT_POS);
         break;
@@ -146,13 +148,13 @@ void loop()
 
 void stop_motor()
 {
-    if (state == States::MOVE_TO_END)
+    if (state == States::MOVE_TO_END && !handled)
     {
         // Stop motor
         digitalWrite(MOTOR1, HIGH);
         digitalWrite(MOTOR2, HIGH);
         Serial.println("MOTOR STOP");
-
+        handled = true;
     }
     
 }
