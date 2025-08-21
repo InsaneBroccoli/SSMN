@@ -24,8 +24,7 @@ enum States {
     IDLE,
     MOVE_TO_END,
     RETURN_TO_START,
-    DELIVER_BALL,
-    TESTING
+    DELIVER_BALL
 };
 
 Servo myservo;
@@ -65,11 +64,6 @@ void loop()
 
         digitalWrite(MOTOR1, LOW);
         digitalWrite(MOTOR2, HIGH);
-        break;
-    
-    case States::TESTING:
-        Serial.println("TESTING");
-        delay(10000);
         break;
 
     case States::FIND_START:
